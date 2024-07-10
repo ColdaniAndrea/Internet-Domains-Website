@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<style>
+  table {
+    margin: 0 auto;
+    width: 80%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    border: 2px solid black;
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    font-family: 'Francois One', sans-serif;
+    background-color: #d0cccc;
+    text-align: center;
+  }
+
+  h1 {
+    text-align: center;
+  }
+</style>
+
+<head>
+  <title>Domini Giustini: ordini utente</title>
+</head>
+
+<body data-server-no-reload>
+  <h1>Ordini effettuati</h1>
+
+  <table id="tbl">
+    <tr>
+      <th colspan="4">INFORMAZIONI DOMINI</th>
+    </tr>
+    <tr>
+      <th>Nome dominio</th>
+      <th>Oggetto</th>
+      <th>Data Ordine</th>
+      <th>Prezzo</th>
+    </tr>
+  </table>
+
+  <script>
+    const API_URI = "http://localhost:8080/domains";
+
+    async function getInfo() {
+      //parametri per l'id
+      const params = new URLSearchParams(window.location.search);
+      const idUtente = params.get('id');
+
+      const response = await fetch(`${API_URI}/${idUtente}/orders`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      var data;
+
+      if (!response.ok) {
+        alert("Errore");
+      } else {
+        data = await response.json();
+      }
+
+      for (let item of data) {
+        let row = document.createElement("tr");
+
+        let name = document.createElement("td");
+        name.appendChild(document.createTextNode(`${item.dominioInternet}`));
+        row.appendChild(name);
+
+        let oggetto = document.createElement("td");
+        oggetto.appendChild(document.createTextNode(`${item.oggetto}`));
+        row.appendChild(oggetto);
+
+        let data = document.createElement("td");
+        data.appendChild(document.createTextNode(`${item.dataOrdine}`));
+        row.appendChild(data);
+
+        let prezzo = document.createElement("td");
+        prezzo.appendChild(document.createTextNode(`${item.prezzo}`));
+        row.appendChild(prezzo);
+
+        document.getElementById("tbl").appendChild(row);
+      }
+    }
+
+    getInfo();
+
+  </script>
+</body>
+
+</html>

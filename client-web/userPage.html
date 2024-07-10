@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Domini Giustini: Home</title>
+    <style>
+      body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f9f9f9;
+      }
+      h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+      }
+      h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+      }
+      .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+      }
+      button {
+            width: 600px;
+            height: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+      }
+      button:hover {
+            background-color: #0056b3;
+      }
+      .form-container {
+            display: flex;
+            flex-direction: column;
+            width: 600px;
+            background: #fff;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .form-container input {
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+      }
+      .form-container button {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+      }
+      .form-container button:hover {
+            background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body data-server-no-reload>
+    <h2 id="user-title">Pagina Personale Utente</h2>
+    <div class="button-container">
+      <button onclick="controllaDisponibilitaDominio()">Controlla disponibilità dominio</button>
+      <button onclick="visualizzaDominiUtente()">Visualizza domini utente</button>
+      <button onclick="visualizzaOrdiniUtente()">Visualizza ordini utente</button> 
+    </div>
+    <br>
+    <form id = "registerForm" class="form-container">
+        <h2>Dominio</h2>
+        <input type="text" id="nomeDominio" placeholder="Nome Dominio" required>
+        <input type="number" id="anniScadenza" placeholder="Anni di Scadenza (1-10)" min="1" max="10" required>
+        
+        <h2>Dati Pagamento</h2>
+        <input type="text" id="intestatario" placeholder="Intestatario (Nome Cognome)" required>
+        <input type="text" id="numeroCarta" placeholder="Numero Carta" required>
+        <input type="text" id="scadenza" placeholder="Scadenza (MM-AA)" required>
+        <input type="number" id="cvv" placeholder="CVV" required>
+        <button type="button" onclick="registraNuovoDominio()">Registra Nuovo Dominio</button>
+    </form>
+
+    <script>
+      const API_URI = "http://localhost:8080";
+      
+      // Funzione per estrarre i parametri della query string dall'URL
+      function getQueryParams() {
+        const params = {};
+        const queryString = window.location.search.slice(1);
+        const pairs = queryString.split('&');
+        
+        for (const pair of pairs) {
+          const [key, value] = pair.split('=');
+          params[key] = decodeURIComponent(value);
+        }
+        
+        return params;
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        // Estrarre l'ID utente dalla query string
+        const params = getQueryParams();
+        const idUtente = params.id;
+        
+        // Cambio del testo dell'h2 con l'ID dell'utente
+        const userTitle = document.getElementById('user-title');
+        userTitle.textContent = `Home: Utente ${idUtente}`;
+      });
+
+      async function visualizzaDominiUtente() {
+        const params = getQueryParams();
+        const idUtente = params.id;
+
+        try {
+          const response = await fetch(`${API_URI}/domains/${idUtente}/userDomains`, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            window.location.href = `userDomains.html?id=${idUtente}`;
+          } else {
+            alert('Errore nel recuperare i domini utente');
+          }
+        } catch (error) {
+          console.error('Errore:', error);
+        }
+      }
+
+      async function controllaDisponibilitaDominio() {
+        const params = getQueryParams();
+        const idUtente = params.id;
+
+        const domainName = prompt("Inserisci il nome del dominio da controllare:");
+        if (!domainName) return;
+
+        try {
+          const response = await fetch(`${API_URI}/domains/${idUtente}/${domainName}/availability`, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            alert('Dominio disponibile')
+          } else if (response.status == 409) {
+            const user = await response.json();
+            alert(`Dominio già registrato da:\nNome: ${user.name}\nCognome: ${user.surname}\nEmail: ${user.email}`);
+          } else {
+            alert('Errore nel recuperare i domini dell\'utente');
+          }
+        } catch (error) {
+          console.error('Errore:', error);
+        }
+      }
+
+      async function visualizzaOrdiniUtente() {
+        const params = getQueryParams();
+        const idUtente = params.id;
+
+        try {
+          const response = await fetch(`${API_URI}/domains/${idUtente}/orders`, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            window.location.href = `userOrders.html?id=${idUtente}`;
+          } else {
+            console.log('Errore nel recuperare gli ordini utente');
+          }
+        } catch (error) {
+          console.error('Errore:', error);
+        }
+      }
+
+      async function registraNuovoDominio() {
+        const params = getQueryParams();
+        const idUtente = params.id;
+        const nomeDominio = document.getElementById('nomeDominio').value;
+        const anniScadenza = document.getElementById('anniScadenza').value;
+        const intestatario = document.getElementById('intestatario').value;
+        const numeroCarta = document.getElementById('numeroCarta').value;
+        const scadenza = document.getElementById('scadenza').value;
+        const cvv = document.getElementById('cvv').value;
+        const data = {
+            domain: {
+                nomeDominio: nomeDominio,
+                anniScadenza: parseInt(anniScadenza, 10)
+              },
+            cartaUtente: {
+                intestatario: intestatario,
+                numeroCarta: numeroCarta,
+                scadenza: scadenza,
+                cvv: parseInt(cvv, 10)
+              }
+          };
+
+        try {
+          const response = await fetch(`${API_URI}/domains/${idUtente}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          });
+          console.log(response);
+          if (response.status == 201) {
+            alert(`Dominio ${nomeDominio} registrato con successo`);
+          } else if (response.status == 409){
+            alert("Dati inseriti nel modo errato oppure dominio già registrato")
+          } else if (response.status == 404){
+            alert("Utente non trovato")
+          } else if (response.status == 400){
+            alert("Richiesta errata, controllare il formato dei dati")
+          } else {
+            alert('Errore nella registrazione del dominio');
+          }
+          
+          var form = document.getElementById('registerForm').reset();
+        } catch (error) {
+          console.error('Errore:', error);
+          var form = document.getElementById('registerForm').reset();
+        }
+      }
+    </script>
+  </body>
+</html>

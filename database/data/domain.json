@@ -1,0 +1,58 @@
+[
+  {
+  "dominio": "GiorgioRossi.com",
+  "prezzo": 36,
+  "dataRegistrazione": "2024-06-28",
+  "idUtente": 2,
+  "dataScadenza": "2031-06-28"
+ },
+  {
+  "dominio": "LucaRossi.com",
+  "prezzo": 140,
+  "dataRegistrazione": "2024-06-28",
+  "idUtente": 1,
+  "dataScadenza": "2034-06-28"
+ },
+  {
+  "dominio": "Giustino.com",
+  "prezzo": 30,
+  "dataRegistrazione": "2024-06-28",
+  "idUtente": 5,
+  "dataScadenza": "2026-06-28"
+ },
+  {
+  "dominio": "Andrea.com",
+  "prezzo": 105,
+  "dataRegistrazione": "2018-06-28",
+  "idUtente": 3,
+  "dataScadenza": "2020-06-28"
+ },
+  {
+  "dominio": "Fabio.com",
+  "prezzo": 19,
+  "dataRegistrazione": "2022-06-28",
+  "idUtente": 4,
+  "dataScadenza": "2023-06-28"
+ },
+  {
+  "dominio": "FabioColonetti.com",
+  "prezzo": 10,
+  "dataRegistrazione": "2024-06-28",
+  "idUtente": 4,
+  "dataScadenza": "2029-06-28"
+ },
+  {
+  "dominio": "AndreaColdani.com",
+  "prezzo": 15,
+  "dataRegistrazione": "2024-06-28",
+  "idUtente": 3,
+  "dataScadenza": "2031-06-28"
+ },
+  {
+  "dominio": "Giustone.it",
+  "prezzo": 20,
+  "dataRegistrazione": "2024-06-28",
+  "idUtente": 5,
+  "dataScadenza": "2026-06-28"
+ }
+]

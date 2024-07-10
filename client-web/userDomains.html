@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+<style>
+  table {
+    margin: 0 auto;
+    width: 80%;
+    border-collapse: collapse;
+  }
+
+  th,
+  td {
+    border: 2px solid black;
+    padding: 8px;
+    text-align: left;
+  }
+
+  th {
+    font-family: 'Francois One', sans-serif;
+    background-color: #d0cccc;
+    text-align: center;
+  }
+
+  h1 {
+    text-align: center;
+  }
+
+  .form-container {
+    display: flex;
+    flex-direction: column;
+    width: 600px;
+    margin: auto;
+  }
+
+  .form-container input {
+    margin-bottom: 10px;
+    padding: 10px;
+    font-size: 16px;
+  }
+
+  .form-container button {
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+</style>
+
+<head>
+  <title>Domini Giustini: domini utente</title>
+</head>
+
+<body data-server-no-reload>
+  <h1>Domini acquistati</h1>
+
+  <table id="tbl">
+    <tr>
+      <th colspan="4">INFORMAZIONI DOMINI</th>
+    </tr>
+    <tr>
+      <th>Nome dominio</th>
+      <th>Data Registrazione</th>
+      <th>Data Scadenza</th>
+      <th>Rinnovo</th>
+    </tr>
+  </table>
+  <h2 id="formRenew" hidden>
+    <form class="form-container" id="domainForm">
+      <h2>Form rinnovo:</h2>
+      <input type="number" id="anniScadenza" placeholder="Anni di Rinnovo (1-10)" min="1" max="10" required>
+      <input type="text" id="intestatario" placeholder="Intestatario Carta" required>
+      <input type="text" id="numeroCarta" placeholder="Numero Carta" required>
+      <input type="text" id="scadenza" placeholder="Scadenza (MM-AA)" required>
+      <input type="number" id="cvv" placeholder="CVV" required>
+      <button type="button" onclick="renewDomain()">Rinnova Dominio</button>
+    </form>
+  </h2>
+
+  <script>
+    const API_URI = "http://localhost:8080/domains";
+
+    //parametri per l'id
+    const params = new URLSearchParams(window.location.search);
+    const idUtente = params.get('id');
+
+    var nomeDominio = "";
+
+    async function getInfo() {
+
+      const response = await fetch(`${API_URI}/${idUtente}/userDomains`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+
+      var data;
+
+      if (!response.ok) {
+        alert("Errore");
+      } else {
+        data = await response.json();
+      }
+
+      for (let item of data) {
+        let row = document.createElement("tr");
+
+        let name = document.createElement("td");
+        name.appendChild(document.createTextNode(`${item.dominio}`));
+        row.appendChild(name);
+
+        let dataRegistrazione = document.createElement("td");
+        dataRegistrazione.appendChild(document.createTextNode(`${item.dataRegistrazione}`));
+        row.appendChild(dataRegistrazione);
+
+        let dataScadenza = document.createElement("td");
+        dataScadenza.appendChild(document.createTextNode(`${item.dataScadenza}`));
+        row.appendChild(dataScadenza);
+
+        let rinnovo = document.createElement("td");
+        const today = new Date();
+        const expire = new Date(`${item.dataScadenza}`);
+        if (expire >= today) {
+          var button = document.createElement("button");
+          button.textContent = "Disponibile";
+          button.addEventListener("click", function () {
+            document.getElementById("formRenew").removeAttribute("hidden");
+            nomeDominio = `${item.dominio}`;
+          });
+
+          rinnovo.appendChild(button);
+        }
+        else rinnovo.appendChild(document.createTextNode("Non disponibile"));
+        row.appendChild(rinnovo);
+
+        document.getElementById("tbl").appendChild(row);
+      }
+    }
+
+    async function refresh() {
+      location.reload();
+    }
+
+    async function renewDomain() {
+      document.getElementById("formRenew").setAttribute("hidden", true);
+
+      const anniScadenza = document.getElementById('anniScadenza').value;
+      const intestatario = document.getElementById('intestatario').value;
+      const numeroCarta = document.getElementById('numeroCarta').value;
+      const scadenza = document.getElementById('scadenza').value;
+      const cvv = document.getElementById('cvv').value;
+      const data = {
+        domain: {
+          nomeDominio: nomeDominio,
+          anniScadenza: parseInt(anniScadenza, 10)
+        },
+        cartaUtente: {
+          intestatario: intestatario,
+          numeroCarta: numeroCarta,
+          scadenza: scadenza,
+          cvv: parseInt(cvv, 10)
+        }
+      };
+
+      const response = await fetch(`${API_URI}/${idUtente}/${nomeDominio}/renew`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (response.status == 204) {
+        alert("Rinnovo effettuato");
+        refresh();
+      } else if (response.status == 404)
+        alert("Errore nel trovare il dominio o l'utente");
+      else if (response.status == 409)
+        alert("Non si può rinnovare per più di 10 anni");
+      else alert("Errore");
+    }
+
+    getInfo();
+
+  </script>
+</body>
+
+</html>

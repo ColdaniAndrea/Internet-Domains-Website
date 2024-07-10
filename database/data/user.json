@@ -1,0 +1,32 @@
+[
+  {
+  "surname": "Rossi",
+  "name": "Luca",
+  "id": 1,
+  "email": "l.rossi@gmail.com"
+ },
+  {
+  "surname": "Bianchi",
+  "name": "Giorgio",
+  "id": 2,
+  "email": "g.bianchi@gmail.com"
+ },
+  {
+  "surname": "Coldani",
+  "name": "Andrea",
+  "id": 3,
+  "email": "andrea.coldani@gmail.com"
+ },
+  {
+  "surname": "Colonetti",
+  "name": "Fabio",
+  "id": 4,
+  "email": "fabio.colonetti@gmail.com"
+ },
+  {
+  "surname": "Giustone",
+  "name": "Giustino",
+  "id": 5,
+  "email": "giustino.giustone@gmail.com"
+ }
+]

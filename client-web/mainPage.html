@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Domini Giustini: Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f9f9f9;
+    }
+
+    h1 {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    .form-container {
+      display: flex;
+      flex-direction: column;
+      width: 400px;
+      background: #fff;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-container input {
+      margin-bottom: 10px;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .form-container button {
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+
+    .form-container button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+
+<body data-server-no-reload>
+  <h1>Domini Giustini</h1>
+  <h2>Registrati</h2>
+  <form id="registerForm" class="form-container">
+    <input type="text" id="nome" placeholder="Nome" required><br>
+    <input type="text" id="cognome" placeholder="Cognome" required><br>
+    <input type="email" id="email" placeholder="Email" required><br>
+    <button type="button" onclick="registra()">Sign in</button>
+  </form>
+
+  <h2>Accedi</h2>
+  <form id="accessForm" class="form-container">
+    <input type="text" id="idUtente" placeholder="IdUtente" required><br>
+    <button type="button" onclick="accedi()">Log in</button>
+  </form>
+
+  <script>
+    const API_URI = "http://localhost:8080";
+
+    async function registra() {
+      const nome = document.getElementById('nome').value;
+      const cognome = document.getElementById('cognome').value;
+      const email = document.getElementById('email').value;
+
+      const data = {
+        nome: nome,
+        cognome: cognome,
+        email: email
+      };
+
+      try {
+        const response = await fetch(`${API_URI}/domains`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (response.status === 201) {
+          const location = response.headers.get('Location');
+          const idUtente = location.split('/').pop();
+          alert('Registrazione avvenuta con successo. Il tuo ID è ' + idUtente);
+        } else if (response.status == 400) {
+          alert('Campi mancanti');
+        } else if (response.status == 409) {
+          alert('Utente già esistente');
+        } else {
+          alert('Errore nella registrazione');
+        }
+        document.getElementById('registerForm').reset();
+      } catch (error) {
+        console.error('Errore:', error);
+        alert('Si è verificato un errore durante la registrazione');
+        document.getElementById('registerForm').reset();
+      }
+    }
+
+    async function accedi() {
+      const idUtente = document.getElementById('idUtente').value;
+      if (idUtente == "") alert("Campo vuoto");
+      else {
+        try {
+          const response = await fetch(`${API_URI}/domains/${idUtente}`, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            window.location.href = `userPage.html?id=${idUtente}`;
+          } else if (response.status == 404) {
+            alert('Utente non trovato');
+          } else {
+            alert('Errore nell\'accesso');
+          }
+
+          document.getElementById('accessForm').reset();
+        } catch (error) {
+          console.error('Errore:', error);
+          alert('Si è verificato un errore durante l\'accesso');
+          document.getElementById('accessForm').reset();
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>
